@@ -19,9 +19,11 @@ class CompressionResult(BaseModel):
 class AudioStatusOut(BaseModel):
     id: str
     filename: str
+    # status: pending/processing/done/error
     status: str
     error_message: str | None
-    duration_seconds: float | None
+    # + error code?
+    duration_seconds: float | None # +enforce conversion
     sample_rate: int | None
     bpm: float | None
     created_at: datetime

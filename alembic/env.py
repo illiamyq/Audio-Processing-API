@@ -4,8 +4,9 @@ from alembic import context
 
 from app.setup.config import settings
 from app.setup.database import Base
-from app.models import user, audio  # noqa: F401 - imports needed for metadata
+from app.models import user, audio  # noqa: F401 = ignore unused import, but needed for metadata
 
+# https://alembic.sqlalchemy.org/en/latest/tutorial.html
 config = context.config
 config.set_main_option("sqlalchemy.url", settings.DATABASE_URL_SYNC)
 
