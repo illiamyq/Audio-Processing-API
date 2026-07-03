@@ -56,10 +56,8 @@ async def upload_audio(
     storage.upload_bytes(s3_key, raw, content_type=file.content_type)
 
     from app.services.audio import update_audio
-
     await update_audio(db, record, original_key=s3_key)
 
-    # asynchronos
     process_audio.delay(record.id)
 
     return record
@@ -68,10 +66,12 @@ async def upload_audio(
 
 @router.get("", response_model=list[AudioStatusOut])
 async def list_files(
+    page: int = 1,
+    limit: int = 20,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return await list_audio(db, current_user.id)
+    return await list_audio(db, current_user.id, page=page, limit=limit)
 
 
 @router.get("/{audio_id}/status", response_model=AudioStatusOut)
@@ -83,7 +83,6 @@ async def get_status(
     record = await get_audio(db, audio_id, current_user.id)
     if not record:
         raise HTTPException(status_code=404, detail="Not found")
-
     return record
 
 
@@ -96,7 +95,6 @@ async def get_spectrogram(
     record = await get_audio(db, audio_id, current_user.id)
     if not record:
         raise HTTPException(status_code=404, detail="Not found")
-
     if record.status != "done" or not record.spectrogram_key:
         raise HTTPException(status_code=409, detail="Spectrogram not ready")
 

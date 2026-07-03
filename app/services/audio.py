@@ -11,9 +11,14 @@ async def get_audio(db: AsyncSession, audio_id: str, owner_id: str) -> AudioFile
     return result.scalar_one_or_none()
 
 
-async def list_audio(db: AsyncSession, owner_id: str) -> list[AudioFile]:
+async def list_audio(db: AsyncSession, owner_id: str, page: int = 1, limit: int = 20) -> list[AudioFile]:
+    offset = (page - 1) * limit
     result = await db.execute(
-        select(AudioFile).where(AudioFile.owner_id == owner_id).order_by(AudioFile.created_at.desc())
+        select(AudioFile)
+        .where(AudioFile.owner_id == owner_id)
+        .order_by(AudioFile.created_at.desc())
+        .offset(offset)
+        .limit(limit)
     )
     return list(result.scalars().all())
 
