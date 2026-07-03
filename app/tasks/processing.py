@@ -68,19 +68,22 @@ def process_audio(self, audio_id: str):
     with Session(engine) as session:
         record = _get_audio_record(session, audio_id)
         record.status = "processing"
+        original_key = record.original_key
+        filename = record.filename
         session.commit()
 
     try:
-        raw = storage.download_bytes(record.original_key)
+        raw = storage.download_bytes(original_key)
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            original_path = os.path.join(tmpdir, "original" + _ext(record.filename))
+            original_path = os.path.join(tmpdir, "original" + _ext(filename))
             with open(original_path, "wb") as f:
                 f.write(raw)
 
             y, sr = librosa.load(original_path, sr=None, mono=True)
             duration = librosa.get_duration(y=y, sr=sr)
             bpm, _ = librosa.beat.beat_track(y=y, sr=sr)
+            bpm = float(np.asarray(bpm).flat[0])
 
             spectrogram_png = _generate_spectrogram(y, sr)
             spec_key = f"spectrograms/{audio_id}.png"
