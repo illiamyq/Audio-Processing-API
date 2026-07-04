@@ -1,10 +1,11 @@
 from logging.config import fileConfig
-from sqlalchemy import engine_from_config, pool
-from alembic import context
 
+from sqlalchemy import engine_from_config, pool
+
+from alembic import context
+from app.models import audio, user  # noqa: F401 = ignore unused import, but needed for metadata
 from app.setup.config import settings
 from app.setup.database import Base
-from app.models import user, audio  # noqa: F401 = ignore unused import, but needed for metadata
 
 # https://alembic.sqlalchemy.org/en/latest/tutorial.html
 config = context.config

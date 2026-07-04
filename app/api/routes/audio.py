@@ -1,19 +1,19 @@
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from fastapi.responses import Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.setup.database import get_db
-from app.setup.security import get_current_user
-from app.setup.config import settings
 from app.models.user import User
 from app.schemas.audio import (
-    AudioUploadOut,
-    AudioStatusOut,
     AudioCompareOut,
+    AudioStatusOut,
+    AudioUploadOut,
     CompressionResult,
 )
 from app.services import storage
-from app.services.audio import get_audio, list_audio, create_audio_record
+from app.services.audio import create_audio_record, get_audio, list_audio
+from app.setup.config import settings
+from app.setup.database import get_db
+from app.setup.security import get_current_user
 from app.tasks.processing import process_audio
 
 router = APIRouter(prefix="/audio", tags=["audio"])

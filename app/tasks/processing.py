@@ -6,17 +6,15 @@ import ffmpeg
 import librosa
 import matplotlib
 import numpy as np
-import soundfile as sf
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-import sqlalchemy
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from app.setup.config import settings
 from app.models.audio import AudioFile
 from app.services import storage
+from app.setup.config import settings
 from app.tasks.celery_app import celery_app
 
 

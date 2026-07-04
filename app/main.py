@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from app.api.routes import auth, audio
+from app.api.routes import audio, auth
 from app.services.storage import ensure_bucket
 
 

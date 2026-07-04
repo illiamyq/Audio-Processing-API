@@ -45,11 +45,12 @@ dev = [
 include = ["app*"]
 
 [tool.ruff]
-line-length = 100
+line-length = 140
 target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP"]
+ignore = ["F821"]
 
 [tool.mypy]
 python_version = "3.11"

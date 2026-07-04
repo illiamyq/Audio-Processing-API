@@ -1,5 +1,4 @@
 import numpy as np
-import pytest
 
 from app.tasks.processing import _compute_snr, _ext
 
