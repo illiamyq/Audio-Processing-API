@@ -1,10 +1,10 @@
-from fastapi import APIRouter, Header, HTTPException
+from fastapi import APIRouter, Depends, Header, HTTPException
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import Depends
-from app.setup.database import get_db
-from app.setup.config import settings
+
 from app.models.audio import AudioFile
+from app.setup.config import settings
+from app.setup.database import get_db
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
