@@ -18,20 +18,43 @@ async def stats(db: AsyncSession = Depends(get_db)):
     done = await db.scalar(select(func.count()).where(AudioFile.status == "done"))
     errors = await db.scalar(select(func.count()).where(AudioFile.status == "error"))
     pending = await db.scalar(select(func.count()).where(AudioFile.status == "pending"))
-    processing = await db.scalar(select(func.count()).where(AudioFile.status == "processing"))
+    processing = await db.scalar(
+        select(func.count()).where(AudioFile.status == "processing")
+    )
     avg_duration = await db.scalar(select(func.avg(AudioFile.duration_seconds)))
-    avg_bpm = await db.scalar(select(func.avg(AudioFile.bpm)).where(AudioFile.bpm > 0))
+    avg_bpm = await db.scalar(
+        select(func.avg(AudioFile.bpm)).where(AudioFile.bpm > 0)
+    )
     total_bytes = await db.scalar(select(func.sum(AudioFile.size_bytes)))
 
-
-    # TODO
-    # avg snr
-    # most recent error
-    # download urls : original, 128k, 64k + spectrograms
     files_per_user_rows = await db.execute(
         select(AudioFile.owner_id, func.count()).group_by(AudioFile.owner_id)
     )
     files_per_user = {row[0]: row[1] for row in files_per_user_rows}
+
+    done_files = await db.execute(
+        select(AudioFile.compression_results).where(
+            AudioFile.status == "done",
+            AudioFile.compression_results.isnot(None),
+        )
+    )
+    snr_128k, snr_64k = [], []
+    for (results,) in done_files:
+        if "128k" in results and results["128k"].get("snr_db") is not None:
+            snr_128k.append(results["128k"]["snr_db"])
+        if "64k" in results and results["64k"].get("snr_db") is not None:
+            snr_64k.append(results["64k"]["snr_db"])
+
+    recent_error_rows = await db.execute(
+        select(AudioFile.id, AudioFile.filename, AudioFile.error_message)
+        .where(AudioFile.status == "error")
+        .order_by(AudioFile.created_at.desc())
+        .limit(5)
+    )
+    recent_errors = [
+        {"id": r.id, "filename": r.filename, "error": r.error_message}
+        for r in recent_error_rows
+    ]
 
     return {
         "total_files": total,
@@ -44,4 +67,9 @@ async def stats(db: AsyncSession = Depends(get_db)):
         "avg_bpm": round(avg_bpm, 1) if avg_bpm else None,
         "total_storage_mb": round(total_bytes / 1024 / 1024, 2) if total_bytes else 0,
         "files_per_user": files_per_user,
+        "avg_snr_db": {
+            "128k": round(sum(snr_128k) / len(snr_128k), 2) if snr_128k else None,
+            "64k": round(sum(snr_64k) / len(snr_64k), 2) if snr_64k else None,
+        },
+        "recent_errors": recent_errors,
     }
