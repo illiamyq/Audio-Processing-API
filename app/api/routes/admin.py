@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Depends, Header, HTTPException
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.audio import AudioFile
 from app.setup.config import settings
 from app.setup.database import get_db
+from app.tasks.processing import process_audio
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -73,3 +74,19 @@ async def stats(db: AsyncSession = Depends(get_db)):
         },
         "recent_errors": recent_errors,
     }
+
+@router.post("/reprocess-errors", dependencies=[Depends(require_admin)])
+async def reprocess_errors(db: AsyncSession = Depends(get_db)):
+    rows = await db.execute(
+        select(AudioFile.id).where(AudioFile.status == "error")
+    )
+    ids = [r.id for r in rows]
+    for audio_id in ids:
+        await db.execute(
+            update(AudioFile)
+            .where(AudioFile.id == audio_id)
+            .values(status="pending", error_message=None)
+        )
+        process_audio.delay(audio_id)
+    await db.commit()
+    return {"requeued": len(ids)}
