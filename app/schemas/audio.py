@@ -17,6 +17,7 @@ class CompressionResult(BaseModel):
     download_url: str | None = None
 
 
+
 class AudioStatusOut(BaseModel):
     id: str
     filename: str
@@ -28,9 +29,10 @@ class AudioStatusOut(BaseModel):
     sample_rate: int | None
     bpm: float | None
     created_at: datetime
+    spectrogram_url: str | None = None
+    original_url: str | None = None
 
     model_config = {"from_attributes": True}
-
 
 class AudioCompareOut(BaseModel):
     original_size_bytes: int

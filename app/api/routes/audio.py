@@ -83,7 +83,13 @@ async def get_status(
     record = await get_audio(db, audio_id, current_user.id)
     if not record:
         raise HTTPException(status_code=404, detail="Not found")
-    return record
+
+    result = AudioStatusOut.model_validate(record)
+    if record.spectrogram_key:
+        result.spectrogram_url = storage.presigned_url(record.spectrogram_key)
+    if record.original_key:
+        result.original_url = storage.presigned_url(record.original_key)
+    return result
 
 
 @router.get("/{audio_id}/spectrogram")
