@@ -66,7 +66,7 @@ async def upload_audio(
     record = await create_audio_record(
         db,
         owner_id=current_user.id,
-        filename=file.filename,
+        filename=file.filename or "unnamed",
         original_key="",  # filled down
         content_type=file.content_type,
         size_bytes=len(raw),

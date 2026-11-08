@@ -75,8 +75,8 @@ def _run_tool(record: AudioFile, name: str, args: dict) -> dict:
 
 async def advise(record: AudioFile, goal: str, max_steps: int = 6) -> dict:
     client = anthropic.AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
-    messages = [{"role": "user", "content": goal}]
-    trace = []
+    messages: list[dict] = [{"role": "user", "content": goal}]
+    trace: list[dict] = []
     for _ in range(max_steps):
         resp = await client.messages.create(
             model=settings.ANTHROPIC_MODEL,
@@ -89,7 +89,7 @@ async def advise(record: AudioFile, goal: str, max_steps: int = 6) -> dict:
         if resp.stop_reason != "tool_use":
             text = "".join(b.text for b in resp.content if b.type == "text")
             return {"recommendation": text, "trace": trace}
-        results = []
+        results: list[dict] = []
         for block in resp.content:
             if block.type == "tool_use":
                 out = await asyncio.to_thread(_run_tool, record, block.name, block.input)

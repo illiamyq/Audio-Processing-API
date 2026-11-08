@@ -63,7 +63,7 @@ async def stats(db: AsyncSession = Depends(get_db)):
         "errors": errors,
         "pending": pending,
         "processing": processing,
-        "success_rate": round(done / total * 100, 1) if total else 0,
+        "success_rate": round((done or 0) / total * 100, 1) if total else 0,
         "avg_duration_seconds": round(avg_duration, 2) if avg_duration else None,
         "avg_bpm": round(avg_bpm, 1) if avg_bpm else None,
         "total_storage_mb": round(total_bytes / 1024 / 1024, 2) if total_bytes else 0,
