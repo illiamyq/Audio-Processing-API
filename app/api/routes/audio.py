@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from fastapi.responses import Response
+from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.user import User
@@ -10,14 +11,12 @@ from app.schemas.audio import (
     CompressionResult,
 )
 from app.services import storage
+from app.services.agent import advise
 from app.services.audio import create_audio_record, get_audio, list_audio
 from app.setup.config import settings
 from app.setup.database import get_db
 from app.setup.security import get_current_user
 from app.tasks.processing import process_audio
-from pydantic import BaseModel
-
-from app.services.agent import advise
 
 router = APIRouter(prefix="/audio", tags=["audio"])
 
