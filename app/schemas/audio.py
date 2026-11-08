@@ -17,7 +17,6 @@ class CompressionResult(BaseModel):
     download_url: str | None = None
 
 
-
 class AudioStatusOut(BaseModel):
     id: str
     filename: str

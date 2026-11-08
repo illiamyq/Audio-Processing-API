@@ -18,6 +18,9 @@ class Settings(BaseSettings):
     ALLOWED_AUDIO_TYPES: set[str] = {"audio/mpeg", "audio/wav", "audio/flac", "audio/ogg"}
     MAX_UPLOAD_SIZE_MB: int = 50
 
+    ANTHROPIC_API_KEY: str = ""
+    ANTHROPIC_MODEL: str = "claude-sonnet-5-5"
+
     class Config:
         env_file = ".env"
 

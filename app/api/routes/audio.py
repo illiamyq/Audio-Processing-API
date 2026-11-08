@@ -15,6 +15,9 @@ from app.setup.config import settings
 from app.setup.database import get_db
 from app.setup.security import get_current_user
 from app.tasks.processing import process_audio
+from pydantic import BaseModel
+
+from app.services.agent import advise
 
 router = APIRouter(prefix="/audio", tags=["audio"])
 
@@ -26,6 +29,24 @@ router = APIRouter(prefix="/audio", tags=["audio"])
 #     """Fetch audio record and verify ownership."""
 #     return await get_audio(db, audio_id, user.id)
 
+class AdviseIn(BaseModel):
+    goal: str
+
+@router.post("/{audio_id}/advise")
+async def advise_compression(
+    audio_id: str,
+    body: AdviseIn,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    record = await get_audio(db, audio_id, current_user.id)
+    if not record:
+        raise HTTPException(status_code=404, detail="Not found")
+    if record.status != "done":
+        raise HTTPException(status_code=409, detail="Processing not complete")
+    if not settings.ANTHROPIC_API_KEY:
+        raise HTTPException(status_code=503, detail="Advisor not configured")
+    return await advise(record, body.goal)
 
 @router.post("", response_model=AudioUploadOut, status_code=status.HTTP_201_CREATED)
 async def upload_audio(
